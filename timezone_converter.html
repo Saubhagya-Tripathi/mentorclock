@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MentorClock</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.4/luxon.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f1 50%, #ffeee6 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #EB7100, #ff8c42);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #EB7100;
+            box-shadow: 0 0 0 3px rgba(235, 113, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .convert-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #EB7100, #ff8c42);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .convert-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .convert-btn:hover::before {
+            left: 100%;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(235, 113, 0, 0.3);
+        }
+
+        .convert-btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            border-left: 5px solid #EB7100;
+            display: none;
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        .result-time {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #EB7100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .time-icon {
+            font-size: 1.5rem;
+        }
+
+        .error {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-container {
+                padding: 25px 20px;
+            }
+            
+            .convert-btn {
+                padding: 16px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕐 MentorClock</h1>
+            <p>Log mentor sessions in the correct time — every time.</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="form-group">
+                <label for="sessionDateTime">Mentor local time (IST)</label>
+                <input type="datetime-local" id="sessionDateTime" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="studentTimezone">Student time zone as per Lumos</label>
+                <select id="studentTimezone" required>
+                    <option value="">Select student timezone</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="mentorTimezone">Mentor reporting time</label>
+                <select id="mentorTimezone" required>
+                    <option value="">Select mentor reporting timezone</option>
+                    <option value="America/Los_Angeles">Pacific time - US & Canada</option>
+                    <option value="America/Denver">Mountain time - US & Canada</option>
+                    <option value="America/Chicago">Central Time - US & Canada</option>
+                    <option value="America/New_York">Eastern time - US & Canada</option>
+                    <option value="America/Anchorage">Alaska time</option>
+                    <option value="America/Phoenix">Arizona, Yukon time</option>
+                    <option value="America/St_Johns">Newfoundland time</option>
+                    <option value="Pacific/Honolulu">Hawaii time</option>
+                </select>
+            </div>
+            
+            <button class="convert-btn" onclick="convertTime()">
+                <span class="btn-text">Sync Time</span>
+            </button>
+            
+            <div class="error" id="errorMessage"></div>
+            
+            <div class="results" id="results">
+                <div class="result-item" id="studentResult">
+                    <div class="result-header" id="studentHeader"></div>
+                    <div class="result-time" id="studentTime"></div>
+                </div>
+                
+                <div class="result-item" id="mentorResult">
+                    <div class="result-header" id="mentorHeader"></div>
+                    <div class="result-time" id="mentorTime"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { DateTime } = luxon;
+
+        // US-only student timezones
+        const studentTimezones = [
+            'America/New_York',      // Eastern Time
+            'America/Chicago',       // Central Time  
+            'America/Denver',        // Mountain Time
+            'America/Los_Angeles',   // Pacific Time
+            'America/Phoenix',       // Arizona Time
+            'America/Anchorage',     // Alaska Time
+            'Pacific/Honolulu',      // Hawaii Time
+            'America/Detroit',       // Eastern Time (Michigan)
+            'America/Indianapolis',  // Eastern Time (Indiana)
+            'America/Louisville',    // Eastern Time (Kentucky)
+            'America/Menominee',     // Central Time (Michigan)
+            'America/North_Dakota/Center', // Central Time (North Dakota)
+            'America/North_Dakota/New_Salem', // Central Time (North Dakota)
+            'America/North_Dakota/Beulah'    // Central Time (North Dakota)
+        ].sort();
+
+        // Mentor timezone mapping (label -> IANA)
+        const mentorTimezoneMap = {
+            'America/Los_Angeles': 'Pacific time - US & Canada',
+            'America/Denver': 'Mountain time - US & Canada', 
+            'America/Chicago': 'Central Time - US & Canada',
+            'America/New_York': 'Eastern time - US & Canada',
+            'America/Anchorage': 'Alaska time',
+            'America/Phoenix': 'Arizona, Yukon time',
+            'America/St_Johns': 'Newfoundland time',
+            'Pacific/Honolulu': 'Hawaii time'
+        };
+
+        // Populate student timezone dropdown with better labels
+        function populateStudentTimezones() {
+            const select = document.getElementById('studentTimezone');
+            const timezoneLabels = {
+                'America/New_York': 'Eastern Time (New York)',
+                'America/Chicago': 'Central Time (Chicago)', 
+                'America/Denver': 'Mountain Time (Denver)',
+                'America/Los_Angeles': 'Pacific Time (Los Angeles)',
+                'America/Phoenix': 'Arizona Time (Phoenix)',
+                'America/Anchorage': 'Alaska Time (Anchorage)',
+                'Pacific/Honolulu': 'Hawaii Time (Honolulu)',
+                'America/Detroit': 'Eastern Time (Detroit)',
+                'America/Indianapolis': 'Eastern Time (Indianapolis)',
+                'America/Louisville': 'Eastern Time (Louisville)',
+                'America/Menominee': 'Central Time (Menominee)',
+                'America/North_Dakota/Center': 'Central Time (North Dakota)',
+                'America/North_Dakota/New_Salem': 'Central Time (North Dakota)',
+                'America/North_Dakota/Beulah': 'Central Time (North Dakota)'
+            };
+            
+            studentTimezones.forEach(tz => {
+                const option = document.createElement('option');
+                option.value = tz;
+                option.textContent = timezoneLabels[tz] || tz.replace('_', ' ');
+                select.appendChild(option);
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function convertTime() {
+            hideError();
+            
+            const sessionDateTime = document.getElementById('sessionDateTime').value;
+            const studentTz = document.getElementById('studentTimezone').value;
+            const mentorTz = document.getElementById('mentorTimezone').value;
+            
+            // Validation
+            if (!sessionDateTime) {
+                showError('Please enter the session date and time');
+                return;
+            }
+            
+            if (!studentTz) {
+                showError('Please select student timezone');
+                return;
+            }
+            
+            if (!mentorTz) {
+                showError('Please select mentor reporting timezone');
+                return;
+            }
+
+            // Show loading state
+            const btn = document.querySelector('.convert-btn');
+            const btnText = btn.querySelector('.btn-text');
+            btnText.innerHTML = '<span class="loading"></span> Syncing...';
+            btn.disabled = true;
+
+            try {
+                // Parse IST time (Asia/Kolkata)
+                const istTime = DateTime.fromISO(sessionDateTime, { zone: 'Asia/Kolkata' });
+                
+                if (!istTime.isValid) {
+                    throw new Error('Invalid date/time format');
+                }
+                
+                // Convert to student timezone
+                const studentTime = istTime.setZone(studentTz);
+                
+                // Convert to mentor reporting timezone  
+                const mentorTime = istTime.setZone(mentorTz);
+                
+                // Format times in 12-hour format with date
+                const studentFormatted = studentTime.toFormat('yyyy-MM-dd hh:mm a');
+                const mentorFormatted = mentorTime.toFormat('yyyy-MM-dd hh:mm a');
+                
+                // Update results
+                document.getElementById('studentHeader').textContent = `🧑‍🎓 Student Time (${studentTz}):`;
+                document.getElementById('studentTime').innerHTML = `<span class="time-icon">🕰️</span> ${studentFormatted}`;
+                
+                const mentorLabel = mentorTimezoneMap[mentorTz];
+                document.getElementById('mentorHeader').textContent = `🧑‍🏫 Mentor Reporting Time (${mentorLabel}):`;
+                document.getElementById('mentorTime').innerHTML = `<span class="time-icon">🕰️</span> ${mentorFormatted}`;
+                
+                // Show results with animation
+                setTimeout(() => {
+                    document.getElementById('results').style.display = 'block';
+                }, 300);
+                
+            } catch (error) {
+                showError('Error converting time: ' + error.message);
+            } finally {
+                // Reset button state
+                setTimeout(() => {
+                    btnText.textContent = 'Sync Time';
+                    btn.disabled = false;
+                }, 500);
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            populateStudentTimezones();
+            
+            // Set current date/time as default
+            const now = new Date();
+            const istNow = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // Convert to IST
+            const formatted = istNow.toISOString().slice(0, 16);
+            document.getElementById('sessionDateTime').value = formatted;
+        });
+
+        // Add Enter key support
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+                convertTime();
+            }
+        });
+    </script>
+</body>
+</html>
