@@ -35,7 +35,7 @@ MentorClock simplifies the process by giving you a **clear and accurate conversi
 ## 🌐 Access the Tool
 
 > This tool is not listed publicly. You can access it only via this direct link:  
-**[🔗 MentorClock Tool](https://your-username.github.io/mentorclock/index.html)**
+**[🔗 MentorClock Tool](https://saubhagya-tripathi.github.io/mentorclock/)**
 
 ---
 
